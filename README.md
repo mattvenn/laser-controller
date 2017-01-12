@@ -22,9 +22,9 @@ Neither Epilog or Coherent were willing to share the DSUB 25 pinout that control
 
 Searching for the DSUB 25 format, only references to [ILDA](https://www.laserworld.com/en/show-laser-light-faq/technical-show-laser-faq/laser-projectors-technical-faq/1140-how-is-the-ilda-connector-pinout.html) were found.
 
-A [board that connects straight through 2 x DSUB 25 was designed in Kicad and milled](laser25.pro)
+A [board](bob/) that connects straight through 2 x DSUB 25 was designed in Kicad and milled
 
-![board back](fab/outp0_original_back.png)
+![board back](bob/fab/outp0_original_back.png)
 
 After finding system ground, all pins were tested with laser on and off:
 
