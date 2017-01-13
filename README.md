@@ -2,6 +2,12 @@
 
 ## Proposed Control System
 
+* must have internet connection to valid RFID cards
+* enable laser with valid RFID card
+* while laser is enabled, post usage to net every minute
+* if laser is enabled, do not disable if net is down
+* disable laser after X seconds without laser being used
+
 ### Electronics
 
 * ESP8266
