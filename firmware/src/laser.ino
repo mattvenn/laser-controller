@@ -21,7 +21,7 @@
 #define EEP_REBOOTS 2 
 
 // state machine
-#define NOT_CONNECTED 1
+#define START 1
 #define PRE_SAMPLE 2
 #define SAMPLING 3
 #define CHECK_WIFI 4
@@ -29,8 +29,9 @@
 #define WAIT_RFID 6
 
 #define LASER_OFF_DELAY 10000 // how long after the last control pulse do we assume laser is finished
+#define MAX_CONNECT_ATTEMPTS 10
 
-int state = NOT_CONNECTED;
+int state = START;
 
 void setup()
 {
@@ -68,14 +69,13 @@ void laser_ISR()
 void loop()
 {
     static unsigned long start_time;
-    delay(400);
+    delay(10);
 
     switch(state)
     {
-        case NOT_CONNECTED:
+        case START:
         {
             start_wifi();
-            EEPROMWriteInt(EEP_WIFI_CONN, EEPROMReadInt(EEP_WIFI_CONN) + 1);
             state = WAIT_RFID;
             break;
         }
@@ -88,8 +88,8 @@ void loop()
             {
                 if(valid_rfid(current_rfid))
                 {
-                    // turn on relay to enable laser
                     Serial.println(current_rfid);
+                    // turn on relay to enable laser
                     digitalWrite(RELAY, true);
                     state = PRE_SAMPLE;
                 }
@@ -100,6 +100,7 @@ void loop()
         case PRE_SAMPLE:
             attachInterrupt(digitalPinToInterrupt(LASER), laser_ISR, RISING); 
             state = SAMPLING;
+            start_time = millis();
             break;
         case SAMPLING:
         {
@@ -119,14 +120,20 @@ void loop()
         case CHECK_WIFI:
         {
             if(WiFi.status() != WL_CONNECTED) 
-                state = NOT_CONNECTED;
-            else
-                state = POSTING;
+                // try and start it
+                start_wifi();
+            state = POSTING;
             break;
         }
         case POSTING:
         {
-            Serial.println("posting");
+            // only try and post if wifi is connected
+            if(WiFi.status() == WL_CONNECTED) 
+            {
+                Serial.println("posting");
+                post(laser_on, current_rfid);
+            }
+
             // if laser is on, keep sampling
             if(laser_on)
             {
@@ -139,8 +146,6 @@ void loop()
                 Serial.println("laser off, waiting for RFID...");
                 state = WAIT_RFID;
             }
-            //post(laser_on);
-            start_time = millis();
             break;
         }
     }
@@ -152,12 +157,13 @@ void loop()
 
 }
 
+// todo - make request to mattvenn.net with rfid and check it's OK
 bool valid_rfid(String rfid)
 {
     return true;
 }
 
-void post(boolean laser_on)
+void post(boolean laser_on, String current_rfid)
 {
     //send the data to sparkfun
     Serial.print("connecting to ");
@@ -179,6 +185,8 @@ void post(boolean laser_on)
     url += privateKey;
     url += "&laser=";
     url += laser_on;
+    url += "&rfid=";
+    url += current_rfid;
     url += "&uptime=";
     url += millis();
     url += "&num_boots=";
@@ -188,7 +196,7 @@ void post(boolean laser_on)
     
     Serial.print("Requesting URL: ");
     Serial.println(url);
-    
+
     // This will send the request to the server
     client.print(String("GET ") + url + " HTTP/1.1\r\n" +
                  "Host: " + host + "\r\n" + 
@@ -213,15 +221,22 @@ void start_wifi()
 
     WiFi.begin(ssid, password);
 
+    int count = 0;
     while (WiFi.status() != WL_CONNECTED) 
     {
         delay(500);
         Serial.print(".");
-        //update_lcd(0);
+        // don't hang if no internet
+        if(count > MAX_CONNECT_ATTEMPTS)
+            break;
     }
-
     Serial.println("");
-    Serial.println("WiFi connected");  
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
+    EEPROMWriteInt(EEP_WIFI_CONN, EEPROMReadInt(EEP_WIFI_CONN) + 1);
+    
+    if(WiFi.status() == WL_CONNECTED)
+    {
+        Serial.println("WiFi connected");  
+        Serial.println("IP address: ");
+        Serial.println(WiFi.localIP());
+    }
 }
