@@ -2,10 +2,19 @@
 #include <pgmspace.h>
 #include <ESP8266WiFi.h>
 #include "secrets.h"
-#define LASER 14
-#define LED 5
 
-#define SAMPLETIME_MS 60000.0 //1 minutes in ms
+#define LASER 4
+#define RELAY 5 // also wired to an LED
+#define LASER_ON_LED 2
+/*
+* SPI MOSI 13
+* SPI MISO 12
+* SPI CLK 14
+*/
+#define SS_PIN 15
+#define RST_PIN 16
+
+#define POST_TIME_MS 60000.0 //1 minutes in ms
 
 // eeprom addresses (storing 2byte ints so each address is +2)
 #define EEP_WIFI_CONN 0
@@ -17,8 +26,9 @@
 #define SAMPLING 3
 #define CHECK_WIFI 4
 #define POSTING 5
+#define WAIT_RFID 6
 
-#define LASER_OFF_DELAY 60000
+#define LASER_OFF_DELAY 10000 // how long after the last control pulse do we assume laser is finished
 
 int state = NOT_CONNECTED;
 
@@ -38,11 +48,17 @@ void setup()
 
     // pin modes
     pinMode(LASER, INPUT);
-    pinMode(LED, OUTPUT);
+    pinMode(LASER_ON_LED, OUTPUT);
+    pinMode(RELAY, OUTPUT);
+    digitalWrite(RELAY, false);
+    digitalWrite(LASER_ON_LED, false);
+
+    setup_rfid();
 }
 
 volatile unsigned long last_on = 0;
 boolean laser_on = false;
+String current_rfid = "";
 
 void laser_ISR()
 {
@@ -52,6 +68,7 @@ void laser_ISR()
 void loop()
 {
     static unsigned long start_time;
+    delay(400);
 
     switch(state)
     {
@@ -59,7 +76,25 @@ void loop()
         {
             start_wifi();
             EEPROMWriteInt(EEP_WIFI_CONN, EEPROMReadInt(EEP_WIFI_CONN) + 1);
-            state = PRE_SAMPLE;
+            state = WAIT_RFID;
+            break;
+        }
+        case WAIT_RFID:
+        {
+            digitalWrite(RELAY, false);
+            current_rfid = read_rfid();
+            //rfid is present
+            if(current_rfid != "")
+            {
+                if(valid_rfid(current_rfid))
+                {
+                    // turn on relay to enable laser
+                    Serial.println(current_rfid);
+                    digitalWrite(RELAY, true);
+                    state = PRE_SAMPLE;
+                }
+            }
+            //no rfid present
             break;
         }
         case PRE_SAMPLE:
@@ -68,7 +103,7 @@ void loop()
             break;
         case SAMPLING:
         {
-            if((millis() - start_time) > SAMPLETIME_MS)
+            if((millis() - start_time) > POST_TIME_MS)
             {
                 state = CHECK_WIFI;
                 detachInterrupt(digitalPinToInterrupt(LASER));
@@ -78,7 +113,7 @@ void loop()
             if(last_on != 0)
                 laser_on = millis() - last_on < LASER_OFF_DELAY ? true : false;
 
-            digitalWrite(LED, laser_on);
+            digitalWrite(LASER_ON_LED, laser_on);
             break;
         }
         case CHECK_WIFI:
@@ -91,17 +126,35 @@ void loop()
         }
         case POSTING:
         {
-            post(laser_on);
+            Serial.println("posting");
+            // if laser is on, keep sampling
+            if(laser_on)
+            {
+                Serial.println("laser still on, continue waiting");
+                state = PRE_SAMPLE;
+            }
+            // otherwise, need to check the rfid
+            else
+            {
+                Serial.println("laser off, waiting for RFID...");
+                state = WAIT_RFID;
+            }
+            //post(laser_on);
             start_time = millis();
-            state = PRE_SAMPLE;
             break;
         }
     }
-    Serial.println(laser_on);
+/*    Serial.println(laser_on);
     Serial.println(last_on);
     Serial.println(millis());
+    */
     delay(200);
 
+}
+
+bool valid_rfid(String rfid)
+{
+    return true;
 }
 
 void post(boolean laser_on)
