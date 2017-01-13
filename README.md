@@ -13,8 +13,11 @@
 
 * ESP8266 checks RFID against remote DB
 * if valid, light LED
-* set interrupt on pin 7, turn on relay to connect control lines 7&8.
+* turn on relay to connect DSUB25 lines 7&8.
+* laser DSUB25 pin 7 -> interrupt on pin 14,
 * while interrupt is firing make remote request to DB with RFID
+
+[esp8266 firmware](firmware/src/)
 
 ## Control reverse engineering
 
@@ -58,6 +61,8 @@ After finding system ground, all pins were tested with laser on and off:
 
 Only pins 7 & 20 seemed to have any change when lasing. Also thought that they would be a differential signal.
 Cracking out the scope gave these results for rastering, lasing at 50% power and 100% power.
+
+Scope channel 1 is pin 7, channel 2 is 20.
 
 ![raster](docs/raster.png)
 
