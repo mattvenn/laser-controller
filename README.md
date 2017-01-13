@@ -19,6 +19,9 @@
 
 [esp8266 firmware](firmware/src/)
 
+ATM, software just logs when laser is on to [phant
+page](http://phant.cursivedata.co.uk/streams/kBd098lqXzu3mYJOX9YYckorrEy)
+
 ## Control reverse engineering
 
 Neither Epilog or Coherent were willing to share the DSUB 25 pinout that controls the Coherent C Series laser model 1138402-AA.
