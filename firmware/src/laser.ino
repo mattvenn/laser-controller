@@ -160,7 +160,9 @@ void loop()
 // todo - make request to mattvenn.net with rfid and check it's OK
 bool valid_rfid(String rfid)
 {
-    return true;
+    if(rfid == "c184932b")
+        return true;
+    return false;
 }
 
 void post(boolean laser_on, String current_rfid)
