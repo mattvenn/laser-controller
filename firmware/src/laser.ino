@@ -2,6 +2,7 @@
 #include <pgmspace.h>
 #include <ESP8266WiFi.h>
 #include "secrets.h"
+#include "users.h"
 
 #define LASER 4
 #define RELAY 5 // also wired to an LED
@@ -28,7 +29,7 @@
 #define POSTING 5
 #define WAIT_RFID 6
 
-#define LASER_OFF_DELAY 10000 // how long after the last control pulse do we assume laser is finished
+#define LASER_OFF_DELAY 30000 // how long after the last control pulse do we assume laser is finished
 #define MAX_CONNECT_ATTEMPTS 10
 
 int state = START;
@@ -86,12 +87,17 @@ void loop()
             //rfid is present
             if(current_rfid != "")
             {
+                Serial.println(current_rfid);
                 if(valid_rfid(current_rfid))
                 {
-                    Serial.println(current_rfid);
+                    Serial.println("ok");
                     // turn on relay to enable laser
                     digitalWrite(RELAY, true);
                     state = PRE_SAMPLE;
+                }
+                else
+                {
+                    Serial.println("bad id");
                 }
             }
             //no rfid present
@@ -160,8 +166,14 @@ void loop()
 // todo - make request to mattvenn.net with rfid and check it's OK
 bool valid_rfid(String rfid)
 {
-    if(rfid == "c184932b")
-        return true;
+    for(int i=0; i<NUM_USERS; i++)
+    {
+        if(users[i].rfid == rfid)
+        {
+            Serial.println(users[i].name);
+            return true;
+        }
+    }
     return false;
 }
 
