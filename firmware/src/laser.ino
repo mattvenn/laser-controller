@@ -4,7 +4,7 @@
 #include "secrets.h"
 #include "users.h"
 
-#define LASER 4
+#define LASER_IN 4 // has an external 10k pull down and diode for protection of laser in/outs
 #define RELAY 5 // also wired to an LED
 #define LASER_ON_LED 2
 /*
@@ -49,7 +49,8 @@ void setup()
     */
 
     // pin modes
-    pinMode(LASER, INPUT);
+    pinMode(LASER_IN, INPUT);
+    digitalWrite(LASER_IN, false);
     pinMode(LASER_ON_LED, OUTPUT);
     pinMode(RELAY, OUTPUT);
     digitalWrite(RELAY, false);
@@ -104,7 +105,7 @@ void loop()
             break;
         }
         case PRE_SAMPLE:
-            attachInterrupt(digitalPinToInterrupt(LASER), laser_ISR, RISING); 
+            attachInterrupt(digitalPinToInterrupt(LASER_IN), laser_ISR, RISING); 
             state = SAMPLING;
             start_time = millis();
             break;
@@ -113,7 +114,7 @@ void loop()
             if((millis() - start_time) > POST_TIME_MS)
             {
                 state = CHECK_WIFI;
-                detachInterrupt(digitalPinToInterrupt(LASER));
+                detachInterrupt(digitalPinToInterrupt(LASER_IN));
             }
 
             // only valid after first interrupt
