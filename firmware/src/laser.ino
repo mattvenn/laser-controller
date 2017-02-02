@@ -145,7 +145,11 @@ void loop()
             if((millis() - start_time) > POST_TIME_MS)
                 log_state = LOG_POSTING;
 
-            // only valid after first interrupt
+            /*
+            - only valid after first interrupt occurs
+            - even if long posting time, the result of this will
+              be valid because interrupts stay enabled while posting
+            */
             if(last_on != 0)
                 laser_on = millis() - last_on < LASER_OFF_DELAY ? true : false;
 
