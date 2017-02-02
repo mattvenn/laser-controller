@@ -60,6 +60,7 @@ void setup()
     digitalWrite(LASER_ON_LED, false);
 
     setup_rfid();
+
 }
 
 volatile unsigned long last_on = 0;
@@ -75,7 +76,7 @@ void loop()
 {
     static unsigned long start_time;
     static unsigned long auth_time;
-    delay(10);
+    delay(100);
 
     switch(auth_state)
     {
@@ -85,10 +86,13 @@ void loop()
             Serial.println("auth start");
             digitalWrite(RELAY, false);
             auth_state = AUTH_WAIT_RFID;
+            // think interrupts interfere with the rfid reader
+            detachInterrupt(digitalPinToInterrupt(LASER_IN)); 
             break;
         }
         case AUTH_WAIT_RFID:
         {
+            Serial.println("rfid wait");
             current_rfid = read_rfid();
             //rfid is present
             if(current_rfid != "")
@@ -101,6 +105,9 @@ void loop()
                     digitalWrite(RELAY, true);
                     auth_state = AUTH_WAIT_LASER;
                     auth_time = millis();
+
+                    // attach laser interrupt
+                    attachInterrupt(digitalPinToInterrupt(LASER_IN), laser_ISR, RISING); 
                 }
                 else
                 {
@@ -112,7 +119,8 @@ void loop()
         }
         case AUTH_WAIT_LASER:
         {
-            if(laser_on == false && millis() - auth_time > AUTH_TIMEOUT)
+            Serial.println("WAIT LASER");
+            if(laser_on == false && (millis() - auth_time > AUTH_TIMEOUT))
                 auth_state = AUTH_START;
             break;
         }
@@ -129,7 +137,6 @@ void loop()
 
             // start ISR for laser control pulses
             start_time = millis();
-            attachInterrupt(digitalPinToInterrupt(LASER_IN), laser_ISR, RISING); 
             log_state = LOG_SAMPLING;
             break;
         }
@@ -148,9 +155,9 @@ void loop()
         case LOG_POSTING:
         {
             Serial.println("posting");
-            detachInterrupt(digitalPinToInterrupt(LASER_IN));
             post(laser_on, current_rfid);
             log_state = LOG_START;
+            break;
         }
     }
 }
