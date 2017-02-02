@@ -16,23 +16,26 @@
 #define RST_PIN 16
 
 #define POST_TIME_MS 60000.0 //1 minutes in ms
+#define LASER_OFF_DELAY 10000 // how long after the last control pulse do we assume laser is finished
+#define AUTH_TIMEOUT 30000
+#define MAX_CONNECT_ATTEMPTS 10
 
 // eeprom addresses (storing 2byte ints so each address is +2)
 #define EEP_WIFI_CONN 0
 #define EEP_REBOOTS 2 
 
 // state machine
-#define START 1
-#define PRE_SAMPLE 2
-#define SAMPLING 3
-#define CHECK_WIFI 4
-#define POSTING 5
-#define WAIT_RFID 6
+#define AUTH_START 1
+#define AUTH_WAIT_RFID 2
+#define AUTH_WAIT_LASER 3
 
-#define LASER_OFF_DELAY 30000 // how long after the last control pulse do we assume laser is finished
-#define MAX_CONNECT_ATTEMPTS 10
+#define LOG_START 1
+#define LOG_SAMPLING 2
+#define LOG_POSTING 3
 
-int state = START;
+
+int auth_state = AUTH_START;
+int log_state = LOG_START;
 
 void setup()
 {
@@ -71,19 +74,21 @@ void laser_ISR()
 void loop()
 {
     static unsigned long start_time;
+    static unsigned long auth_time;
     delay(10);
 
-    switch(state)
+    switch(auth_state)
     {
-        case START:
+        case AUTH_START:
         {
-            start_wifi();
-            state = WAIT_RFID;
+            // laser starts off
+            Serial.println("auth start");
+            digitalWrite(RELAY, false);
+            auth_state = AUTH_WAIT_RFID;
             break;
         }
-        case WAIT_RFID:
+        case AUTH_WAIT_RFID:
         {
-            digitalWrite(RELAY, false);
             current_rfid = read_rfid();
             //rfid is present
             if(current_rfid != "")
@@ -94,7 +99,8 @@ void loop()
                     Serial.println("ok");
                     // turn on relay to enable laser
                     digitalWrite(RELAY, true);
-                    state = PRE_SAMPLE;
+                    auth_state = AUTH_WAIT_LASER;
+                    auth_time = millis();
                 }
                 else
                 {
@@ -104,18 +110,33 @@ void loop()
             //no rfid present
             break;
         }
-        case PRE_SAMPLE:
-            attachInterrupt(digitalPinToInterrupt(LASER_IN), laser_ISR, RISING); 
-            state = SAMPLING;
-            start_time = millis();
+        case AUTH_WAIT_LASER:
+        {
+            if(laser_on == false && millis() - auth_time > AUTH_TIMEOUT)
+                auth_state = AUTH_START;
             break;
-        case SAMPLING:
+        }
+    }
+
+    //log state machine
+    switch(log_state)
+    {
+        case LOG_START:
+        {
+            // start wifi if necessary 
+            if(WiFi.status() != WL_CONNECTED) 
+                start_wifi();
+
+            // start ISR for laser control pulses
+            start_time = millis();
+            attachInterrupt(digitalPinToInterrupt(LASER_IN), laser_ISR, RISING); 
+            log_state = LOG_SAMPLING;
+            break;
+        }
+        case LOG_SAMPLING:
         {
             if((millis() - start_time) > POST_TIME_MS)
-            {
-                state = CHECK_WIFI;
-                detachInterrupt(digitalPinToInterrupt(LASER_IN));
-            }
+                log_state = LOG_POSTING;
 
             // only valid after first interrupt
             if(last_on != 0)
@@ -124,44 +145,14 @@ void loop()
             digitalWrite(LASER_ON_LED, laser_on);
             break;
         }
-        case CHECK_WIFI:
+        case LOG_POSTING:
         {
-            if(WiFi.status() != WL_CONNECTED) 
-                // try and start it
-                start_wifi();
-            state = POSTING;
-            break;
-        }
-        case POSTING:
-        {
-            // only try and post if wifi is connected
-            if(WiFi.status() == WL_CONNECTED) 
-            {
-                Serial.println("posting");
-                post(laser_on, current_rfid);
-            }
-
-            // if laser is on, keep sampling
-            if(laser_on)
-            {
-                Serial.println("laser still on, continue waiting");
-                state = PRE_SAMPLE;
-            }
-            // otherwise, need to check the rfid
-            else
-            {
-                Serial.println("laser off, waiting for RFID...");
-                state = WAIT_RFID;
-            }
-            break;
+            Serial.println("posting");
+            detachInterrupt(digitalPinToInterrupt(LASER_IN));
+            post(laser_on, current_rfid);
+            log_state = LOG_START;
         }
     }
-/*    Serial.println(laser_on);
-    Serial.println(last_on);
-    Serial.println(millis());
-    */
-    delay(200);
-
 }
 
 // todo - make request to mattvenn.net with rfid and check it's OK
