@@ -17,11 +17,20 @@ filter = 'gt[timestamp]=now%20-30day'
 url = 'http://phant.cursivedata.co.uk/output/%s.json?%s' % (key, filter)
 r = requests.get(url)
 print("got %d records from %s to %s" % (len(r.json()), r.json()[-1]['timestamp'], r.json()[0]['timestamp']))
+total_mins = 0
+
 for record in r.json():
     if record['laser'] == '1':
+        found_user = False
         for user in users:
             if user['rfid'] == record['rfid']:
                 user['minutes'] += 1
+                total_mins += 1
+                found_user = True
+        if found_user == False:
+            print("no such user")
 
 for user in users:
     print("%20s : %4d = %.2f euro" % (user['name'], user['minutes'], user['minutes'] * cost_per_minute))
+
+print("%20s : %4d = %.2f euro" % ("total", total_mins, total_mins * cost_per_minute))
