@@ -1,4 +1,3 @@
-
 #include <pgmspace.h>
 #include <ESP8266WiFi.h>
 #include "secrets.h"
@@ -8,29 +7,29 @@
 #define RELAY 5 // also wired to an LED
 #define LASER_ON_LED 2
 /*
-* SPI MOSI 13
-* SPI MISO 12
-* SPI CLK 14
+SPI MOSI 13
+SPI MISO 12
+SPI CLK 14
 */
 #define SS_PIN 15
 #define RST_PIN 16
 
-#define POST_TIME_MS 60000.0 //1 minutes in ms
-#define LASER_OFF_DELAY 10000 // how long after the last control pulse do we assume laser is finished
-#define AUTH_TIMEOUT 30000
+#define POST_TIME_MS 60000 // how often log is posted
+#define LASER_OFF_DELAY_MS 30000 // how long after the last control pulse do we assume laser is finished
+#define AUTH_TIMEOUT_MS 60000 // how long till rfid current card times out
 #define MAX_CONNECT_ATTEMPTS 10
 
 // eeprom addresses (storing 2byte ints so each address is +2)
 #define EEP_WIFI_CONN 0
 #define EEP_REBOOTS 2 
 
-// state machine
+// state machine defs
 #define AUTH_START 1
 #define AUTH_WAIT_RFID 2
 #define AUTH_WAIT_LASER 3
 
 #define LOG_START 1
-#define LOG_SAMPLING 2
+#define LOG_WAIT 2
 #define LOG_POSTING 3
 
 
@@ -94,7 +93,7 @@ void loop()
         {
             Serial.println("rfid wait");
             current_rfid = read_rfid();
-            //rfid is present
+            // rfid is present
             if(current_rfid != "")
             {
                 Serial.println(current_rfid);
@@ -114,13 +113,27 @@ void loop()
                     Serial.println("bad id");
                 }
             }
-            //no rfid present
+            // no rfid present
             break;
         }
         case AUTH_WAIT_LASER:
         {
             Serial.println("WAIT LASER");
-            if(laser_on == false && (millis() - auth_time > AUTH_TIMEOUT))
+            /*
+            Work out if the laser is on or off. The interrupt fires on positive edges
+            of the pulses that are used to control the laser.
+
+            - only valid after first interrupt occurs
+            - even if long posting time, the result of this will
+              be valid because interrupts stay enabled while posting
+            */
+            if(last_on != 0)
+                laser_on = millis() - last_on < LASER_OFF_DELAY_MS ? true : false;
+
+            digitalWrite(LASER_ON_LED, laser_on);
+
+            // turn off laser if it is not firing
+            if(laser_on == false && (millis() - auth_time > AUTH_TIMEOUT_MS))
                 auth_state = AUTH_START;
             break;
         }
@@ -135,25 +148,14 @@ void loop()
             if(WiFi.status() != WL_CONNECTED) 
                 start_wifi();
 
-            // start ISR for laser control pulses
             start_time = millis();
-            log_state = LOG_SAMPLING;
+            log_state = LOG_WAIT;
             break;
         }
-        case LOG_SAMPLING:
+        case LOG_WAIT:
         {
             if((millis() - start_time) > POST_TIME_MS)
                 log_state = LOG_POSTING;
-
-            /*
-            - only valid after first interrupt occurs
-            - even if long posting time, the result of this will
-              be valid because interrupts stay enabled while posting
-            */
-            if(last_on != 0)
-                laser_on = millis() - last_on < LASER_OFF_DELAY ? true : false;
-
-            digitalWrite(LASER_ON_LED, laser_on);
             break;
         }
         case LOG_POSTING:
