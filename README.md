@@ -15,6 +15,15 @@
 * 2 x leds
 * RFID reader
 
+#### Problems & Fixes
+
+* Sometimes laser pulse isn't detected so laser is switched off
+* Sometimes rfid reader seems to get blocked
+* Sometimes relay turns on but laser won't fire
+ 
+* removed diode voltage drop from relay in case relay is on verge of not having enough voltage to turn on properly
+* put LED in parallel with relay in case was affecting transistor (though voltage on base stayed at (slightly high) 1v)
+
 ### Software
 
 * ESP8266 checks RFID against remote DB
