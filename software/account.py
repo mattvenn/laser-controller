@@ -4,17 +4,17 @@ from pprint import pprint
 from datetime import datetime
 import json
 import argparse
+import csv
 
 cost_per_minute = 10.0 / 60
 key = 'kBd098lqXzu3mYJOX9YYckorrEy'
-users = [
-        { 'name' : "sirius", 'rfid' : "b6c7b158", 'minutes' : 0, 'state': None},
-        { 'name' : "matt",   'rfid' : "967fa958", 'minutes' : 0, 'state': None},
-        { 'name' : "justo",  'rfid' : "d613a458", 'minutes' : 0, 'state': None},
-        { 'name' : "guillem",'rfid' : "962fb158", 'minutes' : 0, 'state': None},
-        { 'name' : "carlos", 'rfid' : "36d9b058", 'minutes' : 0, 'state': None},
-        { 'name' : "oldtag", 'rfid' : "c184932b", 'minutes' : 0, 'state': None}
-    ];
+
+users = []
+
+with open("users.csv",'r') as fh:
+    reader = csv.reader(fh, delimiter=',')
+    for row in reader:
+        users.append({ 'name': row[0], 'rfid': row[1], 'minutes': 0})
 
 parser = argparse.ArgumentParser(description="fetch and process laser records")
 parser.add_argument('--fetch', action='store_const', const=True)
