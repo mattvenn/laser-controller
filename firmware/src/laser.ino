@@ -1,7 +1,6 @@
 #include <pgmspace.h>
 #include <ESP8266WiFi.h>
 #include "secrets.h"
-#include "users.h"
 
 #define LASER_IN 4 // has an external 10k pull down and diode for protection of laser in/outs
 #define RELAY 5 // also wired to an LED
@@ -32,7 +31,15 @@ SPI CLK 14
 #define LOG_WAIT 2
 #define LOG_POSTING 3
 
+#define MAX_USERS 10 
 
+struct CARD {
+    String name;
+    String rfid;
+    } users [MAX_USERS];
+
+
+int num_users = 0;
 int auth_state = AUTH_START;
 int log_state = LOG_START;
 
@@ -148,6 +155,12 @@ void loop()
             if(WiFi.status() != WL_CONNECTED) 
                 start_wifi();
 
+            // fetch users, 1st request after initial connect always fails - so repeat ;(
+            if(num_users == 0)
+                fetch_users();
+            if(num_users == 0)
+                fetch_users();
+
             start_time = millis();
             log_state = LOG_WAIT;
             break;
@@ -168,10 +181,72 @@ void loop()
     }
 }
 
+void fetch_users()
+{
+    WiFiClient client;
+    const int httpPort = 80;
+
+    Serial.print("connecting to ");
+    Serial.println(user_host);
+
+    if(!client.connect(user_host, httpPort)) 
+    {
+        Serial.println("failed to fetch users");
+        return;
+    }
+
+    String url = "/files/users.csv";
+    Serial.print("Requesting users from : ");
+    Serial.println(url);
+    delay(100);
+
+    // This will send the request to the server
+    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+                 "Host: " + user_host + "\r\n" + 
+                 "Connection: close\r\n\r\n");
+
+    int timeout = 0;
+    while(!client.available())
+    {
+        Serial.print(".");
+        if(timeout ++ > 10)
+            break;;
+        delay(100);
+    }
+    
+    // Read all the lines of the reply from server and print them to Serial
+    boolean csv_start = false;
+    while(client.available() && num_users < MAX_USERS)
+    {
+        String line = client.readStringUntil('\n');
+        Serial.println(line);
+        if(csv_start)
+        {
+            int comma = line.indexOf(',');
+            if(comma)
+            {
+                users[num_users].name = line.substring(0, comma);
+                users[num_users].rfid = line.substring(comma+1);
+                Serial.print(num_users);
+                Serial.print(" : ");
+                Serial.print(users[num_users].name);
+                Serial.print(" = ");
+                Serial.println(users[num_users].rfid);
+                num_users ++;
+            }
+        }
+        if(line.charAt(0) == '\r')
+            csv_start = true;
+    }
+  
+    Serial.print("fetched: ");
+    Serial.println(num_users);
+}
+
 // todo - make request to mattvenn.net with rfid and check it's OK
 bool valid_rfid(String rfid)
 {
-    for(int i=0; i<NUM_USERS; i++)
+    for(int i=0; i<num_users; i++)
     {
         if(users[i].rfid == rfid)
         {
@@ -258,4 +333,6 @@ void start_wifi()
         Serial.println("IP address: ");
         Serial.println(WiFi.localIP());
     }
+
+    delay(1000);
 }
