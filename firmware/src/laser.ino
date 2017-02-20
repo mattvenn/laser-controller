@@ -125,7 +125,7 @@ void loop()
         }
         case AUTH_WAIT_LASER:
         {
-            Serial.println("WAIT LASER");
+            Serial.print("WAIT LASER: ");
             /*
             Work out if the laser is on or off. The interrupt fires on positive edges
             of the pulses that are used to control the laser.
@@ -137,11 +137,18 @@ void loop()
             if(last_on != 0)
                 laser_on = millis() - last_on < LASER_OFF_DELAY_MS ? true : false;
 
+            Serial.print(millis() - last_on);
+            Serial.print(",");
+            Serial.println(laser_on);
+
             digitalWrite(LASER_ON_LED, laser_on);
 
             // turn off laser if it is not firing
             if(laser_on == false && (millis() - auth_time > AUTH_TIMEOUT_MS))
+            {
+                Serial.println("laser off, going to auth start");
                 auth_state = AUTH_START;
+            }
             break;
         }
     }
