@@ -134,12 +134,15 @@ void loop()
             - even if long posting time, the result of this will
               be valid because interrupts stay enabled while posting
             */
+            cli(); // disable interrupts
             if(last_on != 0)
                 laser_on = millis() - last_on < LASER_OFF_DELAY_MS ? true : false;
 
             Serial.print(millis() - last_on);
             Serial.print(",");
             Serial.println(laser_on);
+
+            sei(); // enable interrupts
 
             digitalWrite(LASER_ON_LED, laser_on);
 
