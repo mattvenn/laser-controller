@@ -15,27 +15,30 @@
 * 2 x leds
 * RFID reader
 
+* [photo of pcb](https://goo.gl/photos/raj6Eu2eDnTMet147)
+* [pdf schematic](control-board/schematic.pdf)
+
 #### Problems & Fixes
 
-* Sometimes laser pulse isn't detected so laser is switched off
 * Sometimes rfid reader seems to get blocked
-* Sometimes relay turns on but laser won't fire
+* Sometimes laser pulse isn't detected so laser is switched off - fixed by
+ Guillem, was an interrupt issue
+* Sometimes relay turns on but laser won't fire - fixed with new pcb (breadboard
+ bad ground connections)
  
-* removed diode voltage drop from relay in case relay is on verge of not having enough voltage to turn on properly
-* put LED in parallel with relay in case was affecting transistor (though voltage on base stayed at (slightly high) 1v)
-
 ### Software
 
 * ESP8266 checks RFID against remote DB
 * if valid, light LED
 * turn on relay to connect DSUB25 lines 7&8.
 * laser DSUB25 pin 7 -> interrupt on pin 14,
-* while interrupt is firing make remote request to DB with RFID
+* while interrupt is firing post usage to phant
 
 [esp8266 firmware](firmware/src/)
 
-ATM, software just logs when laser is on to [phant
-page](http://phant.cursivedata.co.uk/streams/kBd098lqXzu3mYJOX9YYckorrEy)
+[Dashboard](http://freeboard.cursivedata.co.uk/index.html?load=dust.json)
+
+[Logs](http://phant.cursivedata.co.uk/streams/kBd098lqXzu3mYJOX9YYckorrEy)
 
 ## Control reverse engineering
 
