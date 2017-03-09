@@ -1,6 +1,15 @@
 #include <pgmspace.h>
 #include <ESP8266WiFi.h>
 #include "secrets.h"
+#include <NeoPixelBus.h>
+
+const uint16_t PixelCount = 1; 
+const uint8_t PixelPin = 0;
+
+#define colorSaturation 255
+
+// three element pixels, in different order and speeds
+NeoPixelBus<NeoGrbFeature, NeoEsp8266BitBang800KbpsMethod> strip(PixelCount, PixelPin);
 
 #define LASER_IN 4 // has an external 10k pull down and diode for protection of laser in/outs
 #define RELAY 5 // also wired to an LED
@@ -43,11 +52,16 @@ int num_users = 0;
 int auth_state = AUTH_START;
 int log_state = LOG_START;
 
+RgbColor red(colorSaturation, 0, 0);
+RgbColor green(0, colorSaturation, 0);
+RgbColor blue(0, 0, colorSaturation);
+
 void setup()
 {
     Serial.begin(9600);
     Serial.println();
     Serial.println();
+    strip.Begin();
 
     // update number of times rebooted
     setupEEPROM();
@@ -83,12 +97,14 @@ void loop()
     static unsigned long start_time;
     static unsigned long auth_time;
     delay(100);
+    strip.Show();
 
     switch(auth_state)
     {
         case AUTH_START:
         {
             // laser starts off
+            strip.SetPixelColor(0, red);
             Serial.println("auth start");
             digitalWrite(RELAY, false);
             auth_state = AUTH_WAIT_RFID;
@@ -114,6 +130,7 @@ void loop()
 
                     // attach laser interrupt
                     attachInterrupt(digitalPinToInterrupt(LASER_IN), laser_ISR, RISING); 
+                    strip.SetPixelColor(0, green);
                 }
                 else
                 {
@@ -144,7 +161,14 @@ void loop()
 
             sei(); // enable interrupts
 
-            digitalWrite(LASER_ON_LED, laser_on);
+            if(laser_on)
+            {
+                strip.SetPixelColor(0, blue);
+            }
+            else
+            {
+                strip.SetPixelColor(0, green);
+            }
 
             // turn off laser if it is not firing
             if(laser_on == false && (millis() - auth_time > AUTH_TIMEOUT_MS))
