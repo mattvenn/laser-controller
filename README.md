@@ -1,19 +1,18 @@
 # Epilog 32 ex usage & control system
 
-## Proposed Control System
+## Control System
 
-* must have internet connection to valid RFID cards
+* internet connection to download current valid RFID cards
 * enable laser with valid RFID card
-* while laser is enabled, post usage to net every minute
-* if laser is enabled, do not disable if net is down
+* post usage to net every minute
 * disable laser after X seconds without laser being used
 
 ### Electronics
 
 * ESP8266
 * 2 channel relay & driver
-* 2 x leds
 * RFID reader
+* ws2812 RGB status light
 
 * [photo of pcb](https://goo.gl/photos/raj6Eu2eDnTMet147)
 * [pdf schematic](control-board/schematic.pdf)
