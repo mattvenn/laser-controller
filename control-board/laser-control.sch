@@ -1,0 +1,520 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:ws2812b
+LIBS:laser-control-cache
+EELAYER 26 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L +5V #PWR01
+U 1 1 58C140D1
+P 2050 3200
+F 0 "#PWR01" H 2050 3050 50  0001 C CNN
+F 1 "+5V" H 2050 3340 50  0000 C CNN
+F 2 "" H 2050 3200 60  0000 C CNN
+F 3 "" H 2050 3200 60  0000 C CNN
+	1    2050 3200
+	0    -1   -1   0   
+$EndComp
+$Comp
+L +3.3V #PWR02
+U 1 1 58C140D7
+P 1950 3300
+F 0 "#PWR02" H 1950 3150 50  0001 C CNN
+F 1 "+3.3V" H 1950 3440 50  0000 C CNN
+F 2 "" H 1950 3300 60  0000 C CNN
+F 3 "" H 1950 3300 60  0000 C CNN
+	1    1950 3300
+	0    -1   -1   0   
+$EndComp
+Text Label 2050 3500 2    60   ~ 0
+laser-on
+Text Label 2050 3600 2    60   ~ 0
+laser-sense
+Text Label 2050 3700 0    60   ~ 0
+ws2812
+Text Label 2050 3900 0    60   ~ 0
+ss
+Text Label 2050 4000 0    60   ~ 0
+mosi
+Text Label 2050 4100 0    60   ~ 0
+miso
+Text Label 2050 4200 0    60   ~ 0
+sck
+$Comp
+L CONN_01X14 esp-con1
+U 1 1 58C140E6
+P 2600 3750
+F 0 "esp-con1" H 2600 4500 50  0000 C CNN
+F 1 "CONN_01X14" V 2700 3750 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x14" H 2600 3750 60  0001 C CNN
+F 3 "" H 2600 3750 60  0000 C CNN
+F 4 "1022263" H 2600 3750 60  0001 C CNN "farnell #"
+	1    2600 3750
+	1    0    0    -1  
+$EndComp
+Text Label 2050 4300 0    60   ~ 0
+rst
+$Comp
+L GND #PWR03
+U 1 1 58C140EF
+P 2300 3100
+F 0 "#PWR03" H 2300 2850 50  0001 C CNN
+F 1 "GND" H 2300 2950 50  0000 C CNN
+F 2 "" H 2300 3100 60  0000 C CNN
+F 3 "" H 2300 3100 60  0000 C CNN
+	1    2300 3100
+	0    1    1    0   
+$EndComp
+$Comp
+L RELAY_2RT K1
+U 1 1 58C1416F
+P 2800 1400
+F 0 "K1" H 2800 1928 50  0000 C CNN
+F 1 "RELAY_2RT" H 2800 1837 50  0000 C CNN
+F 2 "fp:relay" H -2250 -350 50  0001 C CNN
+F 3 "" H -2250 -350 50  0000 C CNN
+	1    2800 1400
+	1    0    0    -1  
+$EndComp
+$Comp
+L ws2812b led1
+U 1 1 58C14B62
+P 2650 5550
+F 0 "led1" H 2600 5897 60  0000 C CNN
+F 1 "ws2812b" H 2600 5791 60  0000 C CNN
+F 2 "fp:WS2812B" H -2300 4150 60  0001 C CNN
+F 3 "" H -2300 4150 60  0000 C CNN
+	1    2650 5550
+	1    0    0    -1  
+$EndComp
+$Comp
+L D D1
+U 1 1 58C14DF4
+P 1950 1650
+F 0 "D1" V 1904 1728 50  0000 L CNN
+F 1 "D" V 1995 1728 50  0000 L CNN
+F 2 "Diodes_ThroughHole:Diode_DO-41_SOD81_Horizontal_RM10" H 300 -1300 50  0001 C CNN
+F 3 "" H 300 -1300 50  0000 C CNN
+	1    1950 1650
+	0    1    1    0   
+$EndComp
+$Comp
+L D D2
+U 1 1 58C14F39
+P 6450 2200
+F 0 "D2" V 6496 2122 50  0000 R CNN
+F 1 "D" V 6405 2122 50  0000 R CNN
+F 2 "Diodes_ThroughHole:Diode_DO-41_SOD81_Horizontal_RM10" H 300 -1250 50  0001 C CNN
+F 3 "" H 300 -1250 50  0000 C CNN
+	1    6450 2200
+	0    -1   -1   0   
+$EndComp
+$Comp
+L R r1
+U 1 1 58C1502C
+P 6450 2700
+F 0 "r1" H 6520 2746 50  0000 L CNN
+F 1 "10k" H 6520 2655 50  0000 L CNN
+F 2 "Resistors_ThroughHole:Resistor_Horizontal_RM15mm" V 180 -300 50  0001 C CNN
+F 3 "" H 250 -300 50  0000 C CNN
+	1    6450 2700
+	1    0    0    -1  
+$EndComp
+Text Notes 6150 1750 0    60   ~ 0
+laser sense
+Text Notes 4650 1700 0    60   ~ 0
+rfid reader
+NoConn ~ 3200 1050
+NoConn ~ 3200 1350
+$Comp
+L +5V #PWR04
+U 1 1 58C151F8
+P 2100 1450
+F 0 "#PWR04" H 2100 1300 50  0001 C CNN
+F 1 "+5V" H 2100 1590 50  0000 C CNN
+F 2 "" H 2100 1450 60  0000 C CNN
+F 3 "" H 2100 1450 60  0000 C CNN
+	1    2100 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R1
+U 1 1 58C15335
+P 1550 2050
+F 0 "R1" V 1343 2050 50  0000 C CNN
+F 1 "330r" V 1434 2050 50  0000 C CNN
+F 2 "Resistors_ThroughHole:Resistor_Horizontal_RM15mm" V -4720 -950 50  0001 C CNN
+F 3 "" H -4650 -950 50  0000 C CNN
+	1    1550 2050
+	0    1    1    0   
+$EndComp
+$Comp
+L GND #PWR05
+U 1 1 58C15432
+P 2100 2350
+F 0 "#PWR05" H 2100 2100 50  0001 C CNN
+F 1 "GND" H 2100 2200 50  0000 C CNN
+F 2 "" H 2100 2350 60  0000 C CNN
+F 3 "" H 2100 2350 60  0000 C CNN
+	1    2100 2350
+	1    0    0    -1  
+$EndComp
+Text Label 1400 2050 2    60   ~ 0
+laser-on
+Text Label 2400 1150 2    60   ~ 0
+a-in
+Text Label 2400 1450 2    60   ~ 0
+b-in
+Text Label 3200 1250 0    60   ~ 0
+a-out
+Text Label 3200 1550 0    60   ~ 0
+b-out
+$Comp
+L GND #PWR06
+U 1 1 58C15545
+P 6450 2850
+F 0 "#PWR06" H 6450 2600 50  0001 C CNN
+F 1 "GND" H 6450 2700 50  0000 C CNN
+F 2 "" H 6450 2850 60  0000 C CNN
+F 3 "" H 6450 2850 60  0000 C CNN
+	1    6450 2850
+	1    0    0    -1  
+$EndComp
+Text Label 6450 2050 0    60   ~ 0
+a-out
+Text Label 5900 2450 2    60   ~ 0
+laser-sense
+$Comp
+L GND #PWR07
+U 1 1 58C15799
+P 3000 5650
+F 0 "#PWR07" H 3000 5400 50  0001 C CNN
+F 1 "GND" H 3000 5500 50  0000 C CNN
+F 2 "" H 3000 5650 60  0000 C CNN
+F 3 "" H 3000 5650 60  0000 C CNN
+	1    3000 5650
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR08
+U 1 1 58C157D6
+P 2200 5450
+F 0 "#PWR08" H 2200 5300 50  0001 C CNN
+F 1 "+5V" H 2200 5590 50  0000 C CNN
+F 2 "" H 2200 5450 60  0000 C CNN
+F 3 "" H 2200 5450 60  0000 C CNN
+	1    2200 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 2200 5650
+Text Label 3000 5450 0    60   ~ 0
+ws2812
+$Comp
+L CONN_01X08 rfid1
+U 1 1 58C15A40
+P 4550 2400
+F 0 "rfid1" H 4628 2441 50  0000 L CNN
+F 1 "CONN_01X08" H 4628 2350 50  0000 L CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x08" H 1400 -900 50  0001 C CNN
+F 3 "" H 1400 -900 50  0000 C CNN
+	1    4550 2400
+	1    0    0    -1  
+$EndComp
+Text Label 4350 2050 2    60   ~ 0
+ss
+Text Label 4350 2150 2    60   ~ 0
+sck
+Text Label 4350 2250 2    60   ~ 0
+mosi
+Text Label 4350 2350 2    60   ~ 0
+miso
+Text Label 4350 2650 2    60   ~ 0
+rst
+$Comp
+L +3.3V #PWR09
+U 1 1 58C15C1E
+P 4200 2750
+F 0 "#PWR09" H 4200 2600 50  0001 C CNN
+F 1 "+3.3V" H 4200 2890 50  0000 C CNN
+F 2 "" H 4200 2750 60  0000 C CNN
+F 3 "" H 4200 2750 60  0000 C CNN
+	1    4200 2750
+	0    -1   -1   0   
+$EndComp
+$Comp
+L GND #PWR010
+U 1 1 58C15C4D
+P 4200 2550
+F 0 "#PWR010" H 4200 2300 50  0001 C CNN
+F 1 "GND" H 4200 2400 50  0000 C CNN
+F 2 "" H 4200 2550 60  0000 C CNN
+F 3 "" H 4200 2550 60  0000 C CNN
+	1    4200 2550
+	0    1    1    0   
+$EndComp
+NoConn ~ 4350 2450
+$Comp
+L CONN_01X08 laser1
+U 1 1 58C15D27
+P 4550 3750
+F 0 "laser1" H 4628 3791 50  0000 L CNN
+F 1 "CONN_01X08" H 4628 3700 50  0000 L CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x08" H 100 50  50  0001 C CNN
+F 3 "" H 100 50  50  0000 C CNN
+	1    4550 3750
+	1    0    0    -1  
+$EndComp
+Text Label 4350 3400 2    60   ~ 0
+a-in
+Text Label 4350 3500 2    60   ~ 0
+a-out
+Text Label 4350 3600 2    60   ~ 0
+b-in
+Text Label 4350 3700 2    60   ~ 0
+b-out
+$Comp
+L GND #PWR011
+U 1 1 58C15E57
+P 4350 3800
+F 0 "#PWR011" H 4350 3550 50  0001 C CNN
+F 1 "GND" H 4350 3650 50  0000 C CNN
+F 2 "" H 4350 3800 60  0000 C CNN
+F 3 "" H 4350 3800 60  0000 C CNN
+	1    4350 3800
+	0    1    1    0   
+$EndComp
+$Comp
+L +5V #PWR012
+U 1 1 58C15E76
+P 4350 4100
+F 0 "#PWR012" H 4350 3950 50  0001 C CNN
+F 1 "+5V" H 4350 4240 50  0000 C CNN
+F 2 "" H 4350 4100 60  0000 C CNN
+F 3 "" H 4350 4100 60  0000 C CNN
+	1    4350 4100
+	0    -1   -1   0   
+$EndComp
+$Comp
+L GND #PWR013
+U 1 1 58C15E95
+P 4350 4000
+F 0 "#PWR013" H 4350 3750 50  0001 C CNN
+F 1 "GND" H 4350 3850 50  0000 C CNN
+F 2 "" H 4350 4000 60  0000 C CNN
+F 3 "" H 4350 4000 60  0000 C CNN
+	1    4350 4000
+	0    1    1    0   
+$EndComp
+NoConn ~ 4350 3900
+NoConn ~ 2400 3400
+NoConn ~ 2400 4400
+$Comp
+L +5V #PWR014
+U 1 1 58C16206
+P 4200 1050
+F 0 "#PWR014" H 4200 900 50  0001 C CNN
+F 1 "+5V" H 4200 1190 50  0000 C CNN
+F 2 "" H 4200 1050 60  0000 C CNN
+F 3 "" H 4200 1050 60  0000 C CNN
+	1    4200 1050
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR015
+U 1 1 58C16239
+P 4200 1350
+F 0 "#PWR015" H 4200 1100 50  0001 C CNN
+F 1 "GND" H 4200 1200 50  0000 C CNN
+F 2 "" H 4200 1350 60  0000 C CNN
+F 3 "" H 4200 1350 60  0000 C CNN
+	1    4200 1350
+	1    0    0    -1  
+$EndComp
+$Comp
+L CP C1
+U 1 1 58C162A0
+P 4200 1200
+F 0 "C1" H 4318 1246 50  0000 L CNN
+F 1 "CP" H 4318 1155 50  0000 L CNN
+F 2 "Capacitors_ThroughHole:C_Radial_D5_L6_P2.5" H -312 -200 50  0001 C CNN
+F 3 "" H -350 -50 50  0000 C CNN
+	1    4200 1200
+	1    0    0    -1  
+$EndComp
+$Comp
+L PWR_FLAG #FLG016
+U 1 1 58C16371
+P 4550 1050
+F 0 "#FLG016" H -200 -105 50  0001 C CNN
+F 1 "PWR_FLAG" H 4550 1274 50  0000 C CNN
+F 2 "" H -200 -200 50  0000 C CNN
+F 3 "" H -200 -200 50  0000 C CNN
+	1    4550 1050
+	1    0    0    -1  
+$EndComp
+$Comp
+L PWR_FLAG #FLG017
+U 1 1 58C163DB
+P 4550 1300
+F 0 "#FLG017" H -200 145 50  0001 C CNN
+F 1 "PWR_FLAG" H 4550 1524 50  0000 C CNN
+F 2 "" H -200 50  50  0000 C CNN
+F 3 "" H -200 50  50  0000 C CNN
+	1    4550 1300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4200 1300 4200 1350
+Wire Wire Line
+	4550 1300 4200 1300
+Wire Wire Line
+	4550 1050 4200 1050
+Wire Wire Line
+	4200 2550 4350 2550
+Connection ~ 6450 2450
+Wire Wire Line
+	6450 2450 5900 2450
+Wire Wire Line
+	6450 2350 6450 2550
+Wire Wire Line
+	2100 2250 2100 2350
+Wire Wire Line
+	1700 2050 1800 2050
+Connection ~ 2100 1800
+Wire Wire Line
+	1950 1800 2100 1800
+Connection ~ 2100 1500
+Wire Wire Line
+	1950 1500 2100 1500
+Wire Wire Line
+	2100 1750 2400 1750
+Wire Wire Line
+	2100 1850 2100 1750
+Wire Wire Line
+	2100 1650 2400 1650
+Wire Wire Line
+	2100 1450 2100 1650
+Wire Wire Line
+	1950 3300 2400 3300
+Wire Wire Line
+	2050 3200 2400 3200
+Wire Wire Line
+	2300 3100 2400 3100
+Wire Wire Line
+	2400 4300 2050 4300
+Wire Wire Line
+	2400 3600 2050 3600
+Wire Wire Line
+	2400 3700 2050 3700
+Wire Wire Line
+	2400 3900 2050 3900
+Wire Wire Line
+	2400 4000 2050 4000
+Wire Wire Line
+	2400 4100 2050 4100
+Wire Wire Line
+	2400 4200 2050 4200
+Wire Wire Line
+	2400 3500 2050 3500
+Wire Wire Line
+	4200 2750 4350 2750
+$Comp
+L +3.3V #PWR018
+U 1 1 58C165DE
+P 5100 1000
+F 0 "#PWR018" H 5100 850 50  0001 C CNN
+F 1 "+3.3V" H 5100 1140 50  0000 C CNN
+F 2 "" H 5100 1000 60  0000 C CNN
+F 3 "" H 5100 1000 60  0000 C CNN
+	1    5100 1000
+	1    0    0    -1  
+$EndComp
+$Comp
+L PWR_FLAG #FLG019
+U 1 1 58C1660A
+P 5300 1000
+F 0 "#FLG019" H 550 -155 50  0001 C CNN
+F 1 "PWR_FLAG" H 5300 1224 50  0000 C CNN
+F 2 "" H 550 -250 50  0000 C CNN
+F 3 "" H 550 -250 50  0000 C CNN
+	1    5300 1000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5100 1000 5300 1000
+$Comp
+L Q_NPN_EBC Q1
+U 1 1 58C17C87
+P 2000 2050
+F 0 "Q1" H 2191 2096 50  0000 L CNN
+F 1 "Q_NPN_EBC" H 2191 2005 50  0000 L CNN
+F 2 "Housings_TO-92:TO-92_Inline_Wide" H -450 100 50  0001 C CNN
+F 3 "" H -650 0   50  0000 C CNN
+	1    2000 2050
+	1    0    0    -1  
+$EndComp
+$Comp
+L R r2
+U 1 1 58C18077
+P 1800 3800
+F 0 "r2" H 1870 3846 50  0000 L CNN
+F 1 "10k" H 1870 3755 50  0000 L CNN
+F 2 "Resistors_ThroughHole:Resistor_Horizontal_RM15mm" V -4470 800 50  0001 C CNN
+F 3 "" H -4400 800 50  0000 C CNN
+	1    1800 3800
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2400 3800 1950 3800
+$Comp
+L +3.3V #PWR020
+U 1 1 58C18333
+P 1650 3800
+F 0 "#PWR020" H 1650 3650 50  0001 C CNN
+F 1 "+3.3V" H 1650 3940 50  0000 C CNN
+F 2 "" H 1650 3800 60  0000 C CNN
+F 3 "" H 1650 3800 60  0000 C CNN
+	1    1650 3800
+	0    -1   -1   0   
+$EndComp
+$EndSCHEMATC
