@@ -38,18 +38,32 @@ if args.fetch:
 #print("got %d records from %s to %s" % (len(records), records[-1]['timestamp'], records[0]['timestamp']))
 
 
+current_user = None
+cutting = False
+start = None
+
 with open("rec.csv",'r') as fh:
     reader = csv.DictReader(fh, delimiter=',')
     for record in reader:
 
-        # end state
-        if record['laser'] == '1':
+        # start case
+        if not cutting and record['laser'] == '1':
+            cutting = True
+            # find user
             for user in users:
                 if user['rfid'] == record['rfid']:
                     current_user = user
-            current_user['minutes'] += 1
-            total_mins += 1
-
+            assert current_user is not None
+            start = datetime.strptime(record['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        
+        # end case
+        if cutting == True and record['laser'] == '0':
+            cutting = False;
+            end = datetime.strptime(record['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ")
+            delta = start - end
+            minutes = int(delta.total_seconds() / 60)
+            current_user['minutes'] += minutes
+            total_mins += minutes
 
 for user in users:
     print("%20s : %4d = %.2f euro" % (user['name'], user['minutes'], user['minutes'] * cost_per_minute))
