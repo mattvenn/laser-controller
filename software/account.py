@@ -25,7 +25,7 @@ cutting = False
 stopped = False
 current_user = None
 total_mins = 0
-month = 4
+month = 5
 
 filter = 'gt[timestamp]=2017%02d01&lt[timestamp]=2017%02d01' % (month - 1, month)
 url = 'http://phant.cursivedata.co.uk/output/%s.csv?%s' % (key, filter)
@@ -63,6 +63,7 @@ with open("rec.csv",'r') as fh:
             delta = start - end
             minutes = int(delta.total_seconds() / 60)
             current_user['minutes'] += minutes
+#            print("logging %4d minutes (total %4d) for %10s at %s" % (minutes, current_user['minutes'], current_user['name'], start))
             total_mins += minutes
 
 for user in users:
