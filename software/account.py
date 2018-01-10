@@ -1,7 +1,9 @@
+#!/usr/bin/python
 import requests
 import logging
 from pprint import pprint
-from datetime import datetime
+from datetime import datetime, date
+import calendar
 import json
 import argparse
 import csv
@@ -19,18 +21,28 @@ with open("users.csv",'r') as fh:
 parser = argparse.ArgumentParser(description="fetch and process laser records")
 parser.add_argument('--fetch', action='store_const', const=True)
 parser.add_argument('--hack', action='store_const', const=True) # for old firmware
+parser.add_argument('--filename', default="rec.csv")
+parser.add_argument('--month', type=int, default=0)
 args = parser.parse_args()
 
 cutting = False
 stopped = False
 current_user = None
 total_mins = 0
-month = 5
+year = 2017
 
-filter = 'gt[timestamp]=2017%02d01&lt[timestamp]=2017%02d01' % (month - 1, month)
-url = 'http://phant.cursivedata.co.uk/output/%s.csv?%s' % (key, filter)
 if args.fetch:
-    print("fetching")
+    if args.month == 0:
+        print("specify a --month")
+        exit(1)
+    print("fetching for month %d" % args.month)
+    _, num_days = calendar.monthrange(year, args.month)
+    first_day = date(year, args.month, 1)
+    last_day = date(year, args.month, num_days)
+    filter = 'gt[timestamp]=%s&lt[timestamp]=%s' % (first_day.strftime('%Y%m%d'), last_day.strftime('%Y%m%d'))
+    
+    print(filter)
+    url = 'http://phant.cursivedata.co.uk/output/%s.csv?%s' % (key, filter)
     r = requests.get(url)
     with open("rec.csv",'w') as fh:
         fh.write(r.text)
@@ -42,7 +54,7 @@ current_user = None
 cutting = False
 start = None
 
-with open("rec.csv",'r') as fh:
+with open(args.filename,'r') as fh:
     reader = csv.DictReader(fh, delimiter=',')
     for record in reader:
 
