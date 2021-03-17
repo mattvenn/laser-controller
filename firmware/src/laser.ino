@@ -49,7 +49,7 @@ struct CARD {
 
 
 int num_users = 0;
-int auth_state = AUTH_START;
+int auth_state = AUTH_START; // 2 differnt state machines: auth and log
 int log_state = LOG_START;
 
 RgbColor red(colorSaturation, 0, 0);
@@ -87,7 +87,7 @@ volatile unsigned long last_on = 0;
 boolean laser_on = false;
 String current_rfid = "";
 
-void laser_ISR()
+ICACHE_RAM_ATTR void laser_ISR()
 {
     last_on = millis();
 }
